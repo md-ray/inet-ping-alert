@@ -1,0 +1,4 @@
+host=8.8.8.8
+interval=1000
+timeout=5900
+maxlatency=65
