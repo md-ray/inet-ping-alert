@@ -34,8 +34,8 @@ func main() {
 		}
 
 		pinger.Count = -1
-		pinger.Interval = time.Millisecond * p.MustGetInt("interval")
-		pinger.Timeout = time.Millisecond * p.MustGetInt("timeout")
+		pinger.Interval = time.Millisecond * p.MustGetDuration("interval")
+		pinger.Timeout = time.Millisecond * p.MustGetDuration("timeout")
 		pinger.SetPrivileged(true)
 		pinger.OnRecv = onReceived
 		pinger.OnFinish = onFinish
@@ -66,7 +66,7 @@ func onFinish(stats *ping.Statistics) {
 	client.SetTimeout(time.Duration(10 * time.Second))
 
 	// Evaluate Result here
-	if stats.MaxRtt.Milliseconds() > p.MustGetInt("maxlatency") {
+	if stats.MaxRtt.Milliseconds() > p.MustGetInt64("maxlatency") {
 		isAlert = true
 		client.R().Get("http://192.168.1.84:9090/msg/maxlatency/" + fmt.Sprintf("%v", stats.MaxRtt))
 		client.R().Get("http://192.168.1.84:9090/lcd/green")
