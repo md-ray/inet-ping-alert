@@ -12,7 +12,7 @@ If your network is having problem / intermitten issue, usually the ping latency 
 
 This is how I integrate the alert in my use-case
 
-![video=demo](res/video-demo.mp4)
+![video=demo](res/video-demo.gif)
 
 ## Important Notice
 
