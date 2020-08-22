@@ -2,13 +2,17 @@
 
 Background service apps to monitor your network performance and trigger alert if breaching some threshold, built using Golang. The simplest way to determine whether your network performance (e.g. your broadband home network) is by try to pinging publicly available Internet service, which is always available (such as Google DNS 8.8.8.8). In normal condition, your ping latency shall under threshold which is acceptable (in my home network, it's around 20-50ms)
 
-![Pic1](res/ping-normal.jpg)
+![ping normal](res/ping-normal.jpg)
 
 If your network is having problem / intermitten issue, usually the ping latency will be higher, and even timeout
 
-![Pic1](res/ping-slow.jpg)
+![ping slow](res/ping-slow.jpg)
 
 `inet-ping-alert` will continuously monitor this ping latency as indicator whether your Internet connection stable or having some issues. It can trigger some action/alert based on certain alert; in this source code, it will call internal API in my home network, to [turn on I2C LED connected to my raspberry pi](https://github.com/md-ray/i2c-http-server). You can modify to adjust your requirement (e.g. send push notif, change color of your lamp, trigger siren sound, etc.)
+
+This is how I integrate the alert in my use-case
+
+![video=demo](res/video-demo.mp4)
 
 ## Important Notice
 
