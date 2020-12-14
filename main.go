@@ -7,13 +7,26 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/magiconair/properties"
 	"github.com/sparrc/go-ping"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"encoding/json"
 )
 
 var p = properties.MustLoadFile("PROPERTIES", properties.UTF8)
 
+var mqttclient mqtt.Client
+// var mqtthost string
+var brokername string
+// var username string
+// var password string
+
 func main() {
+	
 
 	host := p.MustGetString("host")
+	mqtthost := p.MustGetString("inetping_mqtt_host")
+	brokername = p.MustGetString("inetping_mqtt_brokername")
+	username := p.MustGetString("inetping_mqtt_username")
+	password := p.MustGetString("inetping_mqtt_password")
 
 	// listen for ctrl-C signal
 	/*
@@ -25,6 +38,24 @@ func main() {
 			}
 		}()
 	*/
+	// Init MQTT
+	opts := mqtt.NewClientOptions().AddBroker(mqtthost)
+	opts.SetUsername(username)
+	opts.SetPassword(password)
+	opts.SetClientID("golang-inetping") // Random client id
+	opts.SetPingTimeout(10 * time.Second)
+	opts.SetKeepAlive(10 * time.Second)
+	opts.SetAutoReconnect(true)
+	opts.SetMaxReconnectInterval(10 * time.Second)
+	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
+		fmt.Printf("!!!!!! mqtt connection lost error: %s\n" + err.Error())
+	})
+
+	mqttclient = mqtt.NewClient(opts)
+	if token := mqttclient.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error().Error())
+	}
+
 
 	for {
 		pinger, err := ping.NewPinger(host)
@@ -81,4 +112,17 @@ func onFinish(stats *ping.Statistics) {
 	if !isAlert {
 		client.R().Get("http://192.168.1.84:9090/clean")
 	}
+
+	// Publish MQTT payload
+	// JSON marshall
+	emp := make(map[string]interface{})
+	emp["max_latency"] = stats.MaxRtt.Milliseconds() 
+	emp["packet_loss"] = stats.PacketLoss
+	empData, err := json.Marshal(emp)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	jsonStr := string(empData)
+	mqttclient.Publish(brokername, 0, false, jsonStr)
 }
